@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import Header from "./Header";
+import  { useState, useEffect } from "react";
+
 
 function PomodoroTimer() {
   const [timeLeft, setTimeLeft] = useState(25 * 60); // Default Pomodoro time in seconds
@@ -41,7 +41,7 @@ function PomodoroTimer() {
 
   return (
     <>
-      <Header />
+
       <div
         className="flex flex-col items-center justify-center min-h-screen bg-red-500 text-white bg-cover bg-center"
         style={{ backgroundImage: `url('/src/assets/focus2.jpg')` }} // Replace with your image path
