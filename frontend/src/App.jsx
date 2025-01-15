@@ -1,23 +1,29 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import PomodoroTimer from "./components/PomodoroTimer";
-import About from "./pages/About";
-import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
+import About from "./components/About";
+import Setting from "./pages/setting";
+import SignUp from "./pages/signup";
+import SignIn from "./pages/login";
+import Header from "./components/Header";
+import './index.css';
+
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
+      <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/pomodoro" element={<PomodoroTimer />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/profile" element={<Profile/>} />
+        <Route path="/timer" element={<PomodoroTimer />} />
+        <Route path="/setting" element={<Setting />} />
+        <Route path="/sign-up" element={<SignUp/>}/>
+        <Route path="/sign-in" element={<SignIn/>}/>
+        <Route path="/About" element={<About/>}/>
       </Routes>
-    </Router>
+    </BrowserRouter>
   );
 }
-
 export default App;
+
