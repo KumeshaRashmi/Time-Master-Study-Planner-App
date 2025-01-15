@@ -1,5 +1,4 @@
-import  { useState, useEffect } from "react";
-
+import { useState, useEffect } from "react";
 
 function PomodoroTimer() {
   const [timeLeft, setTimeLeft] = useState(25 * 60); // Default Pomodoro time in seconds
@@ -40,15 +39,17 @@ function PomodoroTimer() {
   };
 
   return (
-    <>
-
-      <div
-        className="flex flex-col items-center justify-center min-h-screen bg-red-500 text-white bg-cover bg-center"
-        style={{ backgroundImage: `url('/src/assets/focus2.jpg')` }} // Replace with your image path
-      >
-        <div className="bg-white bg-opacity-50 m-5 p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center justify-center min-h-[400px]">
+    <div className="flex min-h-screen">
+      {/* Left Side: Image */}
+      <div className="w-1/2 flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/src/assets/focus5.jfif')`,
+        }}></div>
+      {/* Right Side: Timer and Controls */}
+      <div className="w-1/2 flex items-center justify-center min-h-screen bg-red-500 opacity-90">
+        <div className=" bg-white bg-opacity-80 m-5 p-6 rounded-lg shadow-lg w-full max-w-md flex flex-col items-center justify-center min-h-[400px]">
           {/* Mode Selection */}
-          <div className="flex space-x-4 space-Y-4 mb-6">
+          <div className="flex space-x-4 mb-6">
             {["Pomodoro", "Short Break", "Long Break"].map((item) => (
               <button
                 key={item}
@@ -94,7 +95,7 @@ function PomodoroTimer() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
