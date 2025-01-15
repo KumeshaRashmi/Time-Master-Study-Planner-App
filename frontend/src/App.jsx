@@ -1,4 +1,4 @@
-//import React from "react";
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import PomodoroTimer from "./components/PomodoroTimer";
@@ -26,3 +26,4 @@ function App() {
   );
 }
 export default App;
+
