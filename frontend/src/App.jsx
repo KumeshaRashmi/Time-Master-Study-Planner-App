@@ -8,6 +8,7 @@ import SignUp from "./pages/signup";
 import SignIn from "./pages/login";
 import Header from "./components/Header";
 import './index.css';
+import ToDo from "./pages/ToDo";
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/sign-up" element={<SignUp/>}/>
         <Route path="/sign-in" element={<SignIn/>}/>
         <Route path="/About" element={<About/>}/>
+        <Route path="/todo" element={<ToDo/>}/>
       </Routes>
     </BrowserRouter>
   );

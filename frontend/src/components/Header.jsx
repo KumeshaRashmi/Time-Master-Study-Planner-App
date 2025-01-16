@@ -67,6 +67,9 @@ export default function Header() {
             <Button component={Link} to="/timer" sx={{ color: "red" }}>
               Timer
             </Button>
+            <Button component={Link} to="/todo" sx={{ color: "red" }}>
+              ToDo
+            </Button>
             <Button component={Link} to="/" sx={{ color: "red" }}>
               Home
             </Button>
