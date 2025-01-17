@@ -1,26 +1,33 @@
-import { Button, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import { Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
-export default function SignUp() {
-const [username, setUsername] = useState("");
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
+const Signup = () => {
+  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
+  const navigate = useNavigate();
 
-const handleSignIn = (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Username: ${username}\nEmail: ${email}\nPassword: ${password}`);
-};
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
+      console.log(response.data);
+      alert("Signup successful!");
+      navigate("/timer"); // Redirect to the timer page
+    } catch (err) {
+      console.error(err);
+      alert("Signup failed!");
+    }
+  };
 
-return (
-    <div
-    style={{
-        display: "flex",
-        height: "100vh",
-        fontFamily: "'Roboto', sans-serif",
-    }}
-    >
-      {/* Left Side - Form Section */}
-    <div
+  return (
+    <div style={{ display: "flex", minHeight: "100vh" }}>
+      {/* Left Side - Form */}
+      <div
         style={{
           flex: 1,
           display: "flex",
@@ -29,140 +36,88 @@ return (
           flexDirection: "column",
           backgroundColor: "transparent",
         }}
-    >
-        {/* Sign-In Form */}
+      >
         <div
-        style={{
+          style={{
             backgroundColor: "white",
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
             borderRadius: "8px",
             padding: "24px",
             width: "400px",
-        }}
+          }}
         >
-        <Typography
-            variant="h4"
-            align="center"
-            gutterBottom
-            style={{
-            color: "#F63333",
-            fontWeight: "bold",
-            fontSize: "2rem",
-            }}
-        >
+          <Typography variant="h4" align="center" gutterBottom style={{ color: "#F72C2CFF" }}>
             Create an Account
-        </Typography>
-        <form onSubmit={handleSignIn}>
-            {/* Username Field */}
-            <TextField
-              label="Username"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                fontSize: "1rem",
-                "& fieldset": {
-                    borderColor: "#1a202c",
-                },
-                "&:hover fieldset": {
-                    borderColor: "#F52A2A",
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: "#ED0808",
-                },
-                },
-            }}
-            />
-            {/* Email Field */}
-            <TextField
-              label="Email"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  fontSize: "1rem",
-                  "& fieldset": {
-                    borderColor: "#1a202c",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#F52A2A",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#ED0808",
-                  },
-                },
-            }}
-            />
-            {/* Password Field */}
-            <TextField
-              label="Password"
-              type="password"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  fontSize: "1rem",
-                  "& fieldset": {
-                    borderColor: "#1a202c",
-                },
-                "&:hover fieldset": {
-                    borderColor: "#ED0808",
-                },
-                "&.Mui-focused fieldset": {
-                    borderColor: "#ED0C08",
-                },
-                },
-            }}
-            />
-            {/* Submit Button */}
-            <Button
-              variant="contained"
-              type="submit"
-              fullWidth
-              sx={{
-                marginTop: "16px",
-                padding: "12px",
-                fontSize: "1rem",
-                backgroundColor: "#F43333",
-                "&:hover": {
-                backgroundColor: "#931111",
-                },
-                fontWeight: "bold",
-            }}
-            >
-            SignUp
-            </Button>
-            <Typography
-              align="center"
-              variant="body2"
+          </Typography>
+          <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+            <input
+              name="username"
+              placeholder="Username"
+              onChange={handleChange}
+              required
               style={{
-                marginTop: "16px",
-                fontSize: "0.9rem",
-            }}
+                width: "100%",
+                padding: "12px",
+                marginBottom: "16px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+            />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={handleChange}
+              required
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginBottom: "16px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={handleChange}
+              required
+              style={{
+                width: "100%",
+                padding: "12px",
+                marginBottom: "16px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "4px",
+                backgroundColor: "#F74545FF",
+                color: "white",
+                border: "none",
+              }}
             >
-              Already have an account?{" "}
-              <a
-                href="/sign-in"
-                style={{ textDecoration: "none", color: "#F63333" }}
-            >
-                Log in
+              Signup
+            </button>
+          </form>
+          <Typography variant="body2" align="center" style={{ marginTop: "16px" }}>
+            Already have an account?{" "}
+            <a href="/sign-in" style={{ color: "#FF4A4AFF" }}>
+              Log in
             </a>
-            </Typography>
-        </form>
+          </Typography>
         </div>
-    </div>
+      </div>
+
+      
 
       {/* Right Side - Background Image */}
-    <div
+      <div
         style={{
           flex: 1,
           backgroundImage: `url('/src/assets/signup.jpg')`,
@@ -170,7 +125,9 @@ return (
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
-    />
+      />
     </div>
-);
-}
+  );
+};
+
+export default Signup;
