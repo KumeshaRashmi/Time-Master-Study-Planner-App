@@ -15,8 +15,8 @@ RUN npm install --legacy-peer-deps
 # Copy all local files to the working directory
 COPY . .
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 5173
+EXPOSE 5173
 
 # Run the React app
 CMD ["npm", "run", "dev"]
