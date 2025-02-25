@@ -1,6 +1,6 @@
 services:
   backend:
-    build: ./mern/backend
+    build: ./backend
     ports:
       - "5000:5000"
     networks:
@@ -11,9 +11,9 @@ services:
       - mongodb
 
   frontend:
-    build: ./mern/frontend
+    build: ./frontend
     ports:
-      - "3000:3000"
+      - "5173:5173"
     networks:
       - mern_network
     environment:
@@ -27,6 +27,8 @@ services:
       - mern_network
     volumes:
       - mongo-data:/data/db
+      - /app/node_modules
+    
 
 networks:
   mern_network:
