@@ -11,21 +11,21 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {  
-                bat 'docker build -t kumesha rashmi/timemasterimage-cuban::%BUILD_NUMBER% .'
+                bat 'docker build -t kumesha2244/timemasterimage:%BUILD_NUMBER% .'
             }
         }
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'r', variable: 'asd')]) {
+                withCredentials([string(credentialsId: 'timemasterpassword', variable: 'timemasterpassword')]) {
                     script {
-                        bat "docker login -u kumesha rashmi -p %2244689Kum%"
+                        bat "docker login -u kumesha2244 -p %timemasterpassword%"
                     }
                 }
             }
         }
         stage('Push Image') {
             steps {
-                bat 'docker push kumesha rashmi/timemasterimage-cuban::%BUILD_NUMBER%'
+                bat 'docker push kumesha2244/timemasterimage:%BUILD_NUMBER%'
             }
         }
     }
