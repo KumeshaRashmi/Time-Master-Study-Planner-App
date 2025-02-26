@@ -1,7 +1,7 @@
 # Dockerfile for React client
 
 # Use the Node.js base image
-FROM node:20.13.1
+FROM node:18-alpine AS base
 
 # Set the working directory to /app
 WORKDIR /app

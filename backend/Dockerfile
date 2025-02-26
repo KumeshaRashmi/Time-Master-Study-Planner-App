@@ -1,7 +1,7 @@
 # Dockerfile for server
 
 # Build server
-FROM node:20.13.1
+FROM node:18-alpine AS base
 
 # Working directory be app
 WORKDIR /app
