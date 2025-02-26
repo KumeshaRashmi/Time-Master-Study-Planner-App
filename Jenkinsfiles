@@ -1,37 +1,138 @@
-pipeline {
-    agent any 
+// pipeline {
+//     agent any 
     
-    stages { 
+//     stages { 
+//         stage('SCM Checkout') {
+//             steps {
+//                 retry(3) {
+//                     git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App'
+//                 }
+//             }
+//         }
+//         stage('Build Docker Image') {
+//             steps {  
+//                 bat 'docker build -t kumesha2244/timemasterimage:%BUILD_NUMBER% .'
+//             }
+//         }
+//         stage('Login to Docker Hub') {
+//             steps {
+//                 withCredentials([string(credentialsId: 'timemasterpassword', variable: 'timemasterpassword')]) {
+//                     script {
+//                         bat "docker login -u kumesha2244 -p %timemasterpassword%"
+//                     }
+//                 }
+//             }
+//         }
+//         stage('Push Image') {
+//             steps {
+//                 bat 'docker push kumesha2244/timemasterimage:%BUILD_NUMBER%'
+//             }
+//         }
+//     }
+//     post {
+//         always {
+//             bat 'docker logout'
+//         }
+//     }
+// }
+
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_USERNAME = 'kumesha2244' 
+        DOCKER_IMAGE_FRONTEND = 'kumesha2244/frontend-service'
+        DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
+    }
+
+    stages {
+        // Stage 1: Set Docker Context (Ensure Jenkins uses the correct Docker context)
+        // stage('Set Docker Context') {
+        //     steps {
+        //         script {
+        //             echo "Configuring Docker context..."
+        //             // Check the current Docker context
+        //             def currentContext = bat(script: 'docker context ls --format "{{.Name}} {{.Current}}"', returnStdout: true).trim()
+        //             echo "Current Docker context: ${currentContext}"
+
+        //             // Check if the current context is already 'desktop-linux'
+        //             if (!currentContext.contains("desktop-linux *")) {
+        //                 echo "Switching Docker context to 'desktop-linux'..."
+        //                 bat 'docker context use desktop-linux'
+        //                 echo "Docker context set to 'desktop-linux'."
+        //             } else {
+        //                 echo "Docker context is already set to 'desktop-linux'. No action needed."
+        //             }
+        //         }
+        //     }
+        // }
+
+        // Stage 2: Checkout Source Code from SCM
         stage('SCM Checkout') {
             steps {
                 retry(3) {
-                    git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App'
+                    git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App' // Replace with your repository URL
                 }
             }
         }
-        stage('Build Docker Image') {
-            steps {  
-                bat 'docker build -t kumesha2244/timemasterimage:%BUILD_NUMBER% .'
+
+        // Stage 3: Build Frontend Docker Image
+        stage('Build Frontend Image') {
+            steps {
+                script {
+                    bat "docker build -t ${DOCKER_IMAGE_FRONTEND}:%BUILD_NUMBER% ."
+                }
             }
         }
+
+        // Stage 4: Build Backend Docker Image
+        stage('Build Backend Image') {
+            steps {
+                script {
+                    bat "docker build -t ${DOCKER_IMAGE_BACKEND}:%BUILD_NUMBER% ."
+                }
+            }
+        }
+
+        // Stage 5: Login to Docker Hub
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'timemasterpassword', variable: 'timemasterpassword')]) {
-                    script {
-                        bat "docker login -u kumesha2244 -p %timemasterpassword%"
+                script {
+                    echo "Attempting to log in to Docker Hub..."
+                    withCredentials([string(credentialsId: 'timemasterpassword', variable: 'DOCKER_PASSWORD')]) {
+                        try {
+                            // Log in to Docker Hub
+                            bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                            echo "Successfully logged in to Docker Hub."
+                        } catch (Exception e) {
+                            echo "Failed to log in to Docker Hub: ${e.message}"
+                            error "Docker login failed."
+                        }
                     }
                 }
             }
         }
-        stage('Push Image') {
+
+        // Stage 6: Push Docker Images to Docker Hub
+        stage('Push Images to Docker Hub') {
             steps {
-                bat 'docker push kumesha2244/timemasterimage:%BUILD_NUMBER%'
+                script {
+                    // Push Frontend Image
+                    bat "docker push ${DOCKER_IMAGE_FRONTEND}:%BUILD_NUMBER%"
+
+                    // Push Backend Image
+                    bat "docker push ${DOCKER_IMAGE_BACKEND}:%BUILD_NUMBER%"
+                }
             }
         }
     }
+
+    // Post-build actions
     post {
         always {
+            // Log out from Docker Hub
             bat 'docker logout'
+            echo "Logged out from Docker Hub."
         }
     }
 }
