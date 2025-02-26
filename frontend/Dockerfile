@@ -7,7 +7,7 @@ FROM node:20.13.1
 WORKDIR /app
 
 # Copy package.json to the working directory
-COPY package.json . 
+COPY package.json package-lock.json* ./
 
 # Install dependencies with legacy-peer-deps
 RUN npm install --legacy-peer-deps
