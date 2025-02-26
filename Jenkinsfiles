@@ -99,7 +99,7 @@ pipeline {
             steps {
                 script {
                     echo "Attempting to log in to Docker Hub..."
-                    withCredentials([string(credentialsId: 'timemasterpassword', variable: 'DOCKER_PASSWORD')]) {
+                    withCredentials([string(credentialsId: 'timedocker-pass', variable: 'DOCKER_PASSWORD')]) {
                         try {
                             // Log in to Docker Hub
                             bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
