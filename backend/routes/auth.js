@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret"; // Use env variable
 
 // Signup route
 router.post("/signup", async (req, res) => {
@@ -14,8 +14,13 @@ router.post("/signup", async (req, res) => {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: "Email already registered" });
 
-    const user = new User({ username, email, password });
+    // Hash password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = new User({ username, email, password: hashedPassword });
     await user.save();
+
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -34,6 +39,7 @@ router.post("/login", async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -42,9 +48,10 @@ router.post("/login", async (req, res) => {
 
 // Protected route (timer page)
 router.get("/timer", (req, res) => {
-  const token = req.headers.authorization.split(" ")[1];
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return res.status(401).json({ message: "Unauthorized" });
 
-  if (!token) return res.status(401).json({ message: "Unauthorized" });
+  const token = authHeader.split(" ")[1];
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);

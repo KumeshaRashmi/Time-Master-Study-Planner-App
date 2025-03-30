@@ -15,9 +15,8 @@ const Signup = () => {
     e.preventDefault();
     try {
       const response = await axios.post("http://localhost:5000/api/auth/signup", formData);
-      console.log(response.data);
-      alert("Signup successful!");
-      navigate("/timer"); // Redirect to the timer page
+      
+      navigate("/sign-in"); // Redirect to the timer page
     } catch (err) {
       console.error(err);
       alert("Signup failed!");
