@@ -1,6 +1,7 @@
 import { Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -36,7 +37,9 @@ export default function SignIn() {
   };
 
   return (
+    <><Header/>
     <div style={{ display: "flex", height: "100vh", fontFamily: "'Roboto', sans-serif" }}>
+      
       <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", backgroundColor: "transparent" }}>
         <div style={{ backgroundColor: "white", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)", borderRadius: "8px", padding: "24px", width: "400px" }}>
           <Typography variant="h4" align="center" gutterBottom style={{ color: "#F63333", fontWeight: "bold", fontSize: "2rem" }}>
@@ -67,6 +70,7 @@ export default function SignIn() {
         </div>
       </div>
       <div style={{ flex: 1, backgroundImage: `url('/src/assets/signup.jpg')`, backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat" }} />
-    </div>
+    </div></>
+    
   );
 }

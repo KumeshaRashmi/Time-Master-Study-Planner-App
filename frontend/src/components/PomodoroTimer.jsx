@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Header2 from "./Header2";
 
 function PomodoroTimer() {
   const [timeLeft, setTimeLeft] = useState(25 * 60); // Default Pomodoro time in seconds
@@ -39,6 +40,8 @@ function PomodoroTimer() {
   };
 
   return (
+    <>
+    <Header2/>
     <div className="flex min-h-screen">
       {/* Left Side: Image */}
       <div className="w-1/2 flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat"
@@ -95,7 +98,8 @@ function PomodoroTimer() {
           </div>
         </div>
       </div>
-    </div>
+    </div></>
+    
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Header2 from "../components/Header2";
 
 function ToDo() {
   const [tasks, setTasks] = useState([]); // State for tasks
@@ -60,6 +61,7 @@ function ToDo() {
   };
 
   return (
+    <><Header2/>
     <div className="flex min-h-screen bg-red-500">
       {/* Left Side: Image */}
       <div
@@ -115,7 +117,8 @@ function ToDo() {
           </ul>
         </div>
       </div>
-    </div>
+    </div></>
+  
   );
 }
 

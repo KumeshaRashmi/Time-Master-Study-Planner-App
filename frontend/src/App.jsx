@@ -14,7 +14,7 @@ import ToDo from "./pages/ToDo";
 function App() {
   return (
     <BrowserRouter>
-      <Header />
+     
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/timer" element={<PomodoroTimer />} />
