@@ -1,21 +1,43 @@
-# Dockerfile for server
+# # Dockerfile for server
 
-# Build server
-FROM node:18-alpine AS base
+# # Build server
+# FROM node:18-alpine AS base
 
-# Working directory be app
+# # Working directory be app
+# WORKDIR /app
+
+# #Copy package.json to the working directory
+# COPY package.json package-lock.json* ./
+
+# #Install dependencies
+# RUN npm install
+
+
+# #copy the local files to the working directory
+# COPY . .
+
+# EXPOSE 5000
+
+# CMD ["npm", "start"]
+
+# Use official Node.js image
+FROM node:20-alpine
+
+# Set working directory
 WORKDIR /app
 
-#Copy package.json to the working directory
+# Copy package files separately to improve build cache efficiency
 COPY package.json package-lock.json* ./
 
-#Install dependencies
+# Install only production dependencies
 RUN npm install
 
 
-#copy the local files to the working directory
+# Copy the rest of the application files
 COPY . .
 
+# Expose the application port
 EXPOSE 5000
 
-CMD ["npm", "start"]
+# Start the application
+CMD ["npm","start"]
