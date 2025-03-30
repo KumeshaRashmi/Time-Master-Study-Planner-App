@@ -4,10 +4,12 @@ import { Typewriter } from 'react-simple-typewriter';
 import Follow from '../components/follow';
 import Footer from '../components/footer';
 import About from '../components/About';
+import Header from '../components/Header';
 
 export default function Home() {
   return (
     <div>
+      <Header/>
       {/* Banner Section */}
       <div className="relative">
         <img

@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { AppBar, Toolbar, Button, Typography, Box } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-export default function Header() {
+export default function Header2() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate(); // To programmatically navigate
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    // Clear tokens or session logic here if needed
 
+    // Redirect to login page after logout
+    navigate("/sign-in");
+  };
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#FFFFFF" }}>
@@ -28,20 +35,22 @@ export default function Header() {
           </Link>
         </Box>
 
-        {/* Buttons for Home, Login, and Signup */}
-        {!isLoggedIn && (
-          <>
-            <Button component={Link} to="/" sx={{ color: "red" }}>
-              Home
-            </Button>
-            <Button component={Link} to="/sign-in" sx={{ color: "red" }}>
-              Login
-            </Button>
-            <Button component={Link} to="/sign-up" sx={{ color: "red" }}>
-              Signup
-            </Button>
-          </>
-        )}
+        {/* Navigation Buttons */}
+        
+        <Button component={Link} to="/about" sx={{ color: "red" }}>
+          About
+        </Button>
+        <Button component={Link} to="/timer" sx={{ color: "red" }}>
+          Timer
+        </Button>
+        <Button component={Link} to="/todo" sx={{ color: "red" }}>
+          ToDo
+        </Button>
+
+        {/* Logout Button */}
+        <Button onClick={handleLogout} sx={{ color: "red" }}>
+          Logout
+        </Button>
       </Toolbar>
     </AppBar>
   );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 const Signup = () => {
   const [formData, setFormData] = useState({ username: "", email: "", password: "" });
@@ -24,7 +25,10 @@ const Signup = () => {
   };
 
   return (
+    <>
+    <Header/>
     <div style={{ display: "flex", minHeight: "100vh" }}>
+     
       {/* Left Side - Form */}
       <div
         style={{
@@ -125,7 +129,8 @@ const Signup = () => {
           backgroundRepeat: "no-repeat",
         }}
       />
-    </div>
+    </div></>
+    
   );
 };
 

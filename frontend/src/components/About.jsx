@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion"; // Ensure framer-motion is imported correctly
+import Header2 from "./Header2";
 
 const developers = [
 {
@@ -18,6 +19,7 @@ const developers = [
 
 const About = () => {
 return (
+    <><Header2/>
     <section className="bg-navy text-slate-600 py-12">
     <div className="container mx-auto px-6 text-center">
         {/* About Us Title */}
@@ -70,7 +72,7 @@ return (
         </div>
         </div>
     </div>
-    </section>
+    </section></>
 );
 };
 
