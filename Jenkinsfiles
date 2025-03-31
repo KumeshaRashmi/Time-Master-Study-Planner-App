@@ -95,10 +95,9 @@ pipeline {
         stage('Run Containers for Testing') {
             steps {
                 script {
-                    bat "docker-compose down -v || exit 0"
-                    bat "docker-compose up -d"
-                    sleep(time: 10, unit: 'SECONDS')
-                    bat "docker ps"
+                    bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+                    bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
+                    bat 'docker-compose up -d'                 // Start containers
                 }
             }
         }
@@ -156,6 +155,7 @@ pipeline {
         always {
             bat 'docker logout'
             echo "Logged out from Docker Hub."
+            bat 'docker-compose down -v || exit 0'
         }
         failure {
             echo "Pipeline failed. Check logs."
