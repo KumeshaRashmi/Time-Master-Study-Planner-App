@@ -96,6 +96,8 @@ pipeline {
             steps {
                 script {
                     bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+                    bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
+                    bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
                     bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
                     bat 'docker-compose up -d'                 // Start containers
                 }
