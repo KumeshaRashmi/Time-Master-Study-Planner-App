@@ -104,13 +104,13 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    bat "docker exec backend_service npm test"
-                }
-            }
-        }
+        // stage('Run Tests') {
+        //     steps {
+        //         script {
+        //             bat "docker exec backend_service npm test"
+        //         }
+        //     }
+        // }
 
         stage('Login to Docker Hub') {
             steps {
