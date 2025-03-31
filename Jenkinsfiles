@@ -53,7 +53,14 @@ pipeline {
         stage('SCM Checkout') {
             steps {
                 retry(3) {
-                    git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App'
+                    checkout scmGit(
+                        branches: [[name: '*/main']],
+                        extensions: [],
+                        userRemoteConfigs: [[
+                            credentialsId: 'githubtoken',
+                            url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App.git'
+                        ]]
+                    )
                 }
             }
         }
@@ -107,7 +114,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'timemaster-password', variable: 'timemaster-test')]) {
+                    withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
                         def loginResult = bat(script: "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}", returnStatus: true)
                         if (loginResult != 0) {
                             error "Docker login failed!"
@@ -116,6 +123,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Push Docker Images') {
             parallel {
