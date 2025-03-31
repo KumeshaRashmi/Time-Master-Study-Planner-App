@@ -108,6 +108,8 @@ pipeline {
             steps {
                 script {
                     bat "docker exec backend_service npm test"
+                    bat "docker exec backend_service npx jest"
+
                 }
             }
         }
