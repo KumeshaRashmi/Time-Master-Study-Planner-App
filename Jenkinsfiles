@@ -36,103 +36,121 @@
 //     }
 // }
 
+// 
+
 pipeline {
     agent any
 
     environment {
-        DOCKER_USERNAME = 'kumesha2244' 
+        DOCKER_USERNAME = 'kumesha2244'
         DOCKER_IMAGE_FRONTEND = 'kumesha2244/frontend-service'
         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
+        DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
+        BUILD_TAG = 'latest'
     }
 
     stages {
-        // Stage 1: Set Docker Context (Ensure Jenkins uses the correct Docker context)
-        // stage('Set Docker Context') {
-        //     steps {
-        //         script {
-        //             echo "Configuring Docker context..."
-        //             // Check the current Docker context
-        //             def currentContext = bat(script: 'docker context ls --format "{{.Name}} {{.Current}}"', returnStdout: true).trim()
-        //             echo "Current Docker context: ${currentContext}"
-
-        //             // Check if the current context is already 'desktop-linux'
-        //             if (!currentContext.contains("desktop-linux *")) {
-        //                 echo "Switching Docker context to 'desktop-linux'..."
-        //                 bat 'docker context use desktop-linux'
-        //                 echo "Docker context set to 'desktop-linux'."
-        //             } else {
-        //                 echo "Docker context is already set to 'desktop-linux'. No action needed."
-        //             }
-        //         }
-        //     }
-        // }
-
-        // Stage 2: Checkout Source Code from SCM
         stage('SCM Checkout') {
             steps {
                 retry(3) {
-                    git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App' // Replace with your repository URL
+                    git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App'
                 }
             }
         }
 
-        // Stage 3: Build Frontend Docker Image
-        stage('Build Frontend Image') {
-            steps {
-                script {
-                    bat "docker build -t ${DOCKER_IMAGE_FRONTEND}:%BUILD_NUMBER% ."
+        stage('Build Docker Images') {
+            parallel {
+                stage('Build Frontend') {
+                    steps {
+                        script {
+                            bat "docker build -t ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG} ./frontend"
+                        }
+                    }
                 }
-            }
-        }
-
-        // Stage 4: Build Backend Docker Image
-        stage('Build Backend Image') {
-            steps {
-                script {
-                    bat "docker build -t ${DOCKER_IMAGE_BACKEND}:%BUILD_NUMBER% ."
+                stage('Build Backend') {
+                    steps {
+                        script {
+                            bat "docker build -t ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG} ./backend"
+                        }
+                    }
                 }
-            }
-        }
-
-        // Stage 5: Login to Docker Hub
-        stage('Login to Docker Hub') {
-            steps {
-                script {
-                    echo "Attempting to log in to Docker Hub..."
-                    withCredentials([string(credentialsId: 'timedocker-pass', variable: 'DOCKER_PASSWORD')]) {
-                        try {
-                            // Log in to Docker Hub
-                            bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
-                            echo "Successfully logged in to Docker Hub."
-                        } catch (Exception e) {
-                            echo "Failed to log in to Docker Hub: ${e.message}"
-                            error "Docker login failed."
+                stage('Pull MongoDB Image') {
+                    steps {
+                        script {
+                            bat "docker pull mongo:6.0"
+                            bat "docker tag mongo:6.0 ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}"
                         }
                     }
                 }
             }
         }
 
-        // Stage 6: Push Docker Images to Docker Hub
-        stage('Push Images to Docker Hub') {
+        stage('Run Containers for Testing') {
             steps {
                 script {
-                    // Push Frontend Image
-                    bat "docker push ${DOCKER_IMAGE_FRONTEND}:%BUILD_NUMBER%"
+                    bat "docker-compose down -v || exit 0"
+                    bat "docker-compose up -d"
+                    sleep(time: 10, unit: 'SECONDS')
+                    bat "docker ps"
+                }
+            }
+        }
 
-                    // Push Backend Image
-                    bat "docker push ${DOCKER_IMAGE_BACKEND}:%BUILD_NUMBER%"
+        stage('Run Tests') {
+            steps {
+                script {
+                    bat "docker exec backend_service npm test"
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'timemaster-password', variable: 'timemaster-test')]) {
+                        def loginResult = bat(script: "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}", returnStatus: true)
+                        if (loginResult != 0) {
+                            error "Docker login failed!"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            parallel {
+                stage('Push Frontend Image') {
+                    steps {
+                        script {
+                            bat "docker push ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG}"
+                        }
+                    }
+                }
+                stage('Push Backend Image') {
+                    steps {
+                        script {
+                            bat "docker push ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG}"
+                        }
+                    }
+                }
+                stage('Push MongoDB Image') {
+                    steps {
+                        script {
+                            bat "docker push ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}"
+                        }
+                    }
                 }
             }
         }
     }
 
-    // Post-build actions
     post {
         always {
-            // Log out from Docker Hub
             bat 'docker logout'
             echo "Logged out from Docker Hub."
+        }
+        failure {
+            echo "Pipeline failed. Check logs."
         }
     }
 }
