@@ -104,12 +104,34 @@ pipeline {
             }
         }
 
+        // stage('Run Tests') {
+        //     steps {
+        //         script {
+        //             bat "docker exec backend_service npx jest"
+
+        //         }
+        //     }
+        // }
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    bat "docker exec backend_service npm install"
+                }
+            }
+        }
+
+        stage('Verify Jest Installation') {
+            steps {
+                script {
+                    bat "docker exec backend_service npx jest --version"
+                }
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 script {
-                    bat "docker exec backend_service npm test"
                     bat "docker exec backend_service npx jest"
-
                 }
             }
         }
