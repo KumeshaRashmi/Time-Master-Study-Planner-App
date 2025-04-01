@@ -197,7 +197,6 @@ pipeline {
 
     environment {
         DOCKER_USERNAME = 'kumesha2244'
-        DOCKER_PASSWORD = '2244689Kum'
         DOCKER_IMAGE_FRONTEND = 'kumesha2244/frontend-service'
         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
         DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
@@ -278,7 +277,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
+                    withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
                         bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     }
                 }
