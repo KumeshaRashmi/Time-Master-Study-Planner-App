@@ -1,42 +1,3 @@
-// pipeline {
-//     agent any 
-    
-//     stages { 
-//         stage('SCM Checkout') {
-//             steps {
-//                 retry(3) {
-//                     git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App'
-//                 }
-//             }
-//         }
-//         stage('Build Docker Image') {
-//             steps {  
-//                 bat 'docker build -t kumesha2244/timemasterimage:%BUILD_NUMBER% .'
-//             }
-//         }
-//         stage('Login to Docker Hub') {
-//             steps {
-//                 withCredentials([string(credentialsId: 'timemasterpassword', variable: 'timemasterpassword')]) {
-//                     script {
-//                         bat "docker login -u kumesha2244 -p %timemasterpassword%"
-//                     }
-//                 }
-//             }
-//         }
-//         stage('Push Image') {
-//             steps {
-//                 bat 'docker push kumesha2244/timemasterimage:%BUILD_NUMBER%'
-//             }
-//         }
-//     }
-//     post {
-//         always {
-//             bat 'docker logout'
-//         }
-//     }
-// }
-
-// 
 
 // pipeline {
 //     agent any
@@ -92,65 +53,50 @@
 //             }
 //         }
 
-//         stage('Run Containers for Testing') {
-//             steps {
-//                 script {
-//                     bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
-//                     bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
-//                     bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
-//                     bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
-//                     bat 'docker-compose up -d'                 // Start containers
-//                 }
-//             }
-//         }
+//         // stage('Run Containers for Testing') {
+//         //     steps {
+//         //         script {
+//         //           bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+//         //           bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
+//         //           bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
+//         //           bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
+//         //           bat 'docker-compose up -d'                 // Start containers
+//         //         }
+//         //     }
+//         // }
+
+//         // stage('Install Dependencies') {
+//         //     steps {
+//         //         script {
+//         //             bat "docker exec -u node backend_service npm ci" // Correct way to install dependencies
+//         //         }
+//         //     }
+//         // }
 
 //         // stage('Run Tests') {
 //         //     steps {
 //         //         script {
-//         //             bat "docker exec backend_service npx jest"
-
+//         //             bat "docker exec backend_service npm test"
 //         //         }
 //         //     }
 //         // }
-//         stage('Install Dependencies') {
-//             steps {
-//                 script {
-                    
-//                     bat "docker exec  -u node backend_service npm install"
-//                 }
-//             }
-//         }
-
-//         stage('Verify Jest Installation') {
-//             steps {
-//                 script {
-//                     bat "docker exec backend_service npx jest --version"
-//                 }
-//             }
-//         }
-
-//         stage('Run Tests') {
-//             steps {
-//                 script {
-//                     bat "docker exec backend_service npm test"
-//                     bat "docker exec backend_service npx jest"
-//                 }
-//             }
-//         }
-
+// // stage('Login to Docker Hub') {
+// //             steps {
+// //             withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
+// //                     script {
+// //                         bat "docker login -u kumesha2244 -p %%timemaster-dockerhub%%"
+// //                     }
+// //                 }
+// //         }
+// //         }
 //         stage('Login to Docker Hub') {
 //             steps {
-//                 script {
-//                     withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
-//                         def loginResult = bat(script: "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}", returnStatus: true)
-//                         if (loginResult != 0) {
-//                             error "Docker login failed!"
-//                         }
+//                     withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'timemaster-dockerhubpass')]) {
+//                         bat "docker login -u kumesha2244 -p ${timemaster-dockerhubpass}"
 //                     }
-//                 }
+                
 //             }
 //         }
-
 
 //         stage('Push Docker Images') {
 //             parallel {
@@ -183,13 +129,14 @@
 //         always {
 //             bat 'docker logout'
 //             echo "Logged out from Docker Hub."
-//             bat 'docker-compose down -v || exit 0'
+//             bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
 //         }
 //         failure {
 //             echo "Pipeline failed. Check logs."
 //         }
 //     }
 // }
+
 
 
 pipeline {
@@ -246,48 +193,11 @@ pipeline {
             }
         }
 
-        // stage('Run Containers for Testing') {
-        //     steps {
-        //         script {
-        //           bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
-        //           bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
-        //           bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
-        //           bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
-        //           bat 'docker-compose up -d'                 // Start containers
-        //         }
-        //     }
-        // }
-
-        // stage('Install Dependencies') {
-        //     steps {
-        //         script {
-        //             bat "docker exec -u node backend_service npm ci" // Correct way to install dependencies
-        //         }
-        //     }
-        // }
-
-        // stage('Run Tests') {
-        //     steps {
-        //         script {
-        //             bat "docker exec backend_service npm test"
-        //         }
-        //     }
-        // }
-// stage('Login to Docker Hub') {
-//             steps {
-//             withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
-//                     script {
-//                         bat "docker login -u kumesha2244 -p %%timemaster-dockerhub%%"
-//                     }
-//                 }
-//         }
-//         }
         stage('Login to Docker Hub') {
             steps {
-                script {
-                    withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
-                        def loginCommand = "docker login -u ${DOCKER_USERNAME} -p %%dockerhub-pass%%"
-                        bat loginCommand
+                withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'DOCKER_PASSWORD')]) {
+                    script {
+                    bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
                     }
                 }
             }
