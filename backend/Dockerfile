@@ -37,8 +37,8 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
-# Set ownership to the non-root user
-RUN chown -R node:node /app
+# Fix permissions: Change ownership to the non-root user
+RUN chown -R node:node /app && chmod -R 755 /app
 
 # Switch to non-root user
 USER node
