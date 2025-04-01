@@ -115,7 +115,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 script {
-                    bat "docker exec backend_service npm install"
+                    // Change ownership inside the container to avoid permission issues
+                    bat "docker exec backend_service chown -R node:node /app"
+                    bat "docker exec  -u node backend_service npm install"
                 }
             }
         }

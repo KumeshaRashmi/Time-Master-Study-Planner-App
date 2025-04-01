@@ -29,15 +29,23 @@ WORKDIR /app
 # Copy package files separately to improve build cache efficiency
 COPY package.json package-lock.json* ./
 
-# Install only production dependencies
-RUN npm install && npm install --save-dev jest && npm install -g jest
+
+# Install dependencies (production & development)
+RUN npm install
 
 
 # Copy the rest of the application files
 COPY . .
 
+# Set ownership to the non-root user
+RUN chown -R node:node /app
+
+# Switch to non-root user
+USER node
+
 # Expose the application port
 EXPOSE 5000
+
 
 # Start the application
 CMD ["npm","start"]
