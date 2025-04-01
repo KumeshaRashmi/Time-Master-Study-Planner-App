@@ -197,6 +197,7 @@ pipeline {
 
     environment {
         DOCKER_USERNAME = 'kumesha2244'
+        DOCKER_PASSWORD = '2244689Kum'
         DOCKER_IMAGE_FRONTEND = 'kumesha2244/frontend-service'
         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
         DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
@@ -246,10 +247,33 @@ pipeline {
             }
         }
 
-        
+        // stage('Run Containers for Testing') {
+        //     steps {
+        //         script {
+        //           bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+        //           bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
+        //           bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
+        //           bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
+        //           bat 'docker-compose up -d'                 // Start containers
+        //         }
+        //     }
+        // }
 
-        
+        // stage('Install Dependencies') {
+        //     steps {
+        //         script {
+        //             bat "docker exec -u node backend_service npm ci" // Correct way to install dependencies
+        //         }
+        //     }
+        // }
 
+        // stage('Run Tests') {
+        //     steps {
+        //         script {
+        //             bat "docker exec backend_service npm test"
+        //         }
+        //     }
+        // }
 
         stage('Login to Docker Hub') {
             steps {
