@@ -38,6 +38,160 @@
 
 // 
 
+// pipeline {
+//     agent any
+
+//     environment {
+//         DOCKER_USERNAME = 'kumesha2244'
+//         DOCKER_IMAGE_FRONTEND = 'kumesha2244/frontend-service'
+//         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
+//         DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
+//         BUILD_TAG = 'latest'
+//     }
+
+//     stages {
+//         stage('SCM Checkout') {
+//             steps {
+//                 retry(3) {
+//                     checkout scmGit(
+//                         branches: [[name: '*/main']],
+//                         extensions: [],
+//                         userRemoteConfigs: [[
+//                             credentialsId: 'githubtoken',
+//                             url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App.git'
+//                         ]]
+//                     )
+//                 }
+//             }
+//         }
+
+//         stage('Build Docker Images') {
+//             parallel {
+//                 stage('Build Frontend') {
+//                     steps {
+//                         script {
+//                             bat "docker build -t ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG} ./frontend"
+//                         }
+//                     }
+//                 }
+//                 stage('Build Backend') {
+//                     steps {
+//                         script {
+//                             bat "docker build -t ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG} ./backend"
+//                         }
+//                     }
+//                 }
+//                 stage('Pull MongoDB Image') {
+//                     steps {
+//                         script {
+//                             bat "docker pull mongo:6.0"
+//                             bat "docker tag mongo:6.0 ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}"
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+//         stage('Run Containers for Testing') {
+//             steps {
+//                 script {
+//                     bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+//                     bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
+//                     bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
+//                     bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
+//                     bat 'docker-compose up -d'                 // Start containers
+//                 }
+//             }
+//         }
+
+//         // stage('Run Tests') {
+//         //     steps {
+//         //         script {
+//         //             bat "docker exec backend_service npx jest"
+
+//         //         }
+//         //     }
+//         // }
+//         stage('Install Dependencies') {
+//             steps {
+//                 script {
+                    
+//                     bat "docker exec  -u node backend_service npm install"
+//                 }
+//             }
+//         }
+
+//         stage('Verify Jest Installation') {
+//             steps {
+//                 script {
+//                     bat "docker exec backend_service npx jest --version"
+//                 }
+//             }
+//         }
+
+//         stage('Run Tests') {
+//             steps {
+//                 script {
+//                     bat "docker exec backend_service npm test"
+//                     bat "docker exec backend_service npx jest"
+//                 }
+//             }
+//         }
+
+//         stage('Login to Docker Hub') {
+//             steps {
+//                 script {
+//                     withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
+//                         def loginResult = bat(script: "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}", returnStatus: true)
+//                         if (loginResult != 0) {
+//                             error "Docker login failed!"
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
+
+//         stage('Push Docker Images') {
+//             parallel {
+//                 stage('Push Frontend Image') {
+//                     steps {
+//                         script {
+//                             bat "docker push ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG}"
+//                         }
+//                     }
+//                 }
+//                 stage('Push Backend Image') {
+//                     steps {
+//                         script {
+//                             bat "docker push ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG}"
+//                         }
+//                     }
+//                 }
+//                 stage('Push MongoDB Image') {
+//                     steps {
+//                         script {
+//                             bat "docker push ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}"
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     post {
+//         always {
+//             bat 'docker logout'
+//             echo "Logged out from Docker Hub."
+//             bat 'docker-compose down -v || exit 0'
+//         }
+//         failure {
+//             echo "Pipeline failed. Check logs."
+//         }
+//     }
+// }
+
+
 pipeline {
     agent any
 
@@ -95,37 +249,16 @@ pipeline {
         stage('Run Containers for Testing') {
             steps {
                 script {
-                    bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
-                    bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
-                    bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
-                    bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
-                    bat 'docker-compose up -d'                 // Start containers
+                    bat 'docker-compose down -v || true'  // Ensure cleanup without breaking pipeline
+                    bat 'docker-compose up -d'           // Start all services
                 }
             }
         }
 
-        // stage('Run Tests') {
-        //     steps {
-        //         script {
-        //             bat "docker exec backend_service npx jest"
-
-        //         }
-        //     }
-        // }
         stage('Install Dependencies') {
             steps {
                 script {
-                    // Change ownership inside the container to avoid permission issues
-                    bat "docker exec backend_service chown -R node:node /app"
-                    bat "docker exec  -u node backend_service npm install"
-                }
-            }
-        }
-
-        stage('Verify Jest Installation') {
-            steps {
-                script {
-                    bat "docker exec backend_service npx jest --version"
+                    bat "docker exec -u node backend_service npm ci" // Correct way to install dependencies
                 }
             }
         }
@@ -133,7 +266,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    bat "docker exec backend_service npx jest"
+                    bat "docker exec backend_service npm test"
                 }
             }
         }
@@ -142,15 +275,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
-                        def loginResult = bat(script: "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}", returnStatus: true)
-                        if (loginResult != 0) {
-                            error "Docker login failed!"
-                        }
+                        bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
                     }
                 }
             }
         }
-
 
         stage('Push Docker Images') {
             parallel {
@@ -183,7 +312,7 @@ pipeline {
         always {
             bat 'docker logout'
             echo "Logged out from Docker Hub."
-            bat 'docker-compose down -v || exit 0'
+            bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
         }
         failure {
             echo "Pipeline failed. Check logs."
