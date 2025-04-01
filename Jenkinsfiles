@@ -273,24 +273,25 @@ pipeline {
         //         }
         //     }
         // }
-stage('Login to Docker Hub') {
+// stage('Login to Docker Hub') {
+//             steps {
+//             withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
+//                     script {
+//                         bat "docker login -u kumesha2244 -p %%timemaster-dockerhub%%"
+//                     }
+//                 }
+//         }
+//         }
+        stage('Login to Docker Hub') {
             steps {
-            withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
-                    script {
-                        bat "docker login -u kumesha2244 -p %%timemaster-dockerhub%%"
+                script {
+                    withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
+                        def loginCommand = "docker login -u ${DOCKER_USERNAME} -p %%dockerhub-pass%%"
+                        bat loginCommand
                     }
                 }
-        }
-        }
-        // stage('Login to Docker Hub') {
-        //     steps {
-        //         script {
-        //             withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
-        //                 bat "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
-        //             }
-        //         }
-        //     }
-        // }
+            }
+        }
 
         stage('Push Docker Images') {
             parallel {
