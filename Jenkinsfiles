@@ -148,7 +148,11 @@ pipeline {
         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
         DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
         BUILD_TAG = 'latest'
-        
+        NETWORK_NAME = 'mern'
+        SSH_USER = 'ec2-user'
+        SSH_KET_PATH= "/var/lib/jenkins/.ssh/my-key-pair.pem"
+        EC2_PUBLIC_IP "51.20.53.236"
+        ANSIBLE_PLAYBOOK ="ansible/deploy.yml"
     }
 
     stages {
@@ -167,8 +171,22 @@ pipeline {
             }
         }
 
+        stage('Setup SSH Key') {
+            steps {
+                script {
+                    sh """
+                        mkdir -p /var/lib/jenkins/.ssh
+                        cp /mnt/C:/Users/Asus/.ssh/my-key-pair.pem ${SSH_KEY_PATH}
+                        chmod 600 ${SSH_KEY_PATH}
+                    """
+                }
+            }
+        }
 
-         stage('Terraform Apply') {
+
+
+
+        stage('Terraform Apply') {
             steps {
                 script {
                     bat '''
@@ -245,7 +263,7 @@ pipeline {
     }
 
 
-    stage('Deploy to EC2') {
+    stage('Deploy to EC2 ') {
             steps {
                 script {
                     def ec2_public_ip = bat(script: "cd terraform && terraform output -raw public_ip", returnStdout: true).trim()
@@ -282,10 +300,4 @@ pipeline {
         failure {
             echo "Pipeline failed. Check logs."
         }
-    }bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
-        }
-        failure {
-            echo "Pipeline failed. Check logs."
-        }
     }
-}
