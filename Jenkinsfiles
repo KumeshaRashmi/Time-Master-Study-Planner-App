@@ -1,3 +1,42 @@
+// pipeline {
+//     agent any 
+    
+//     stages { 
+//         stage('SCM Checkout') {
+//             steps {
+//                 retry(3) {
+//                     git branch: 'main', url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App'
+//                 }
+//             }
+//         }
+//         stage('Build Docker Image') {
+//             steps {  
+//                 bat 'docker build -t kumesha2244/timemasterimage:%BUILD_NUMBER% .'
+//             }
+//         }
+//         stage('Login to Docker Hub') {
+//             steps {
+//                 withCredentials([string(credentialsId: 'timemasterpassword', variable: 'timemasterpassword')]) {
+//                     script {
+//                         bat "docker login -u kumesha2244 -p %timemasterpassword%"
+//                     }
+//                 }
+//             }
+//         }
+//         stage('Push Image') {
+//             steps {
+//                 bat 'docker push kumesha2244/timemasterimage:%BUILD_NUMBER%'
+//             }
+//         }
+//     }
+//     post {
+//         always {
+//             bat 'docker logout'
+//         }
+//     }
+// }
+
+// 
 
 // pipeline {
 //     agent any
@@ -53,50 +92,65 @@
 //             }
 //         }
 
-//         // stage('Run Containers for Testing') {
-//         //     steps {
-//         //         script {
-//         //           bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
-//         //           bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
-//         //           bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
-//         //           bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
-//         //           bat 'docker-compose up -d'                 // Start containers
-//         //         }
-//         //     }
-//         // }
-
-//         // stage('Install Dependencies') {
-//         //     steps {
-//         //         script {
-//         //             bat "docker exec -u node backend_service npm ci" // Correct way to install dependencies
-//         //         }
-//         //     }
-//         // }
+//         stage('Run Containers for Testing') {
+//             steps {
+//                 script {
+//                     bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+//                     bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
+//                     bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
+//                     bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
+//                     bat 'docker-compose up -d'                 // Start containers
+//                 }
+//             }
+//         }
 
 //         // stage('Run Tests') {
 //         //     steps {
 //         //         script {
-//         //             bat "docker exec backend_service npm test"
+//         //             bat "docker exec backend_service npx jest"
+
 //         //         }
 //         //     }
 //         // }
-// // stage('Login to Docker Hub') {
-// //             steps {
-// //             withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
-// //                     script {
-// //                         bat "docker login -u kumesha2244 -p %%timemaster-dockerhub%%"
-// //                     }
-// //                 }
-// //         }
-// //         }
-//         stage('Login to Docker Hub') {
+//         stage('Install Dependencies') {
 //             steps {
-//                     withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'timemaster-dockerhubpass')]) {
-//                         bat "docker login -u kumesha2244 -p ${timemaster-dockerhubpass}"
-//                     }
-                
+//                 script {
+                    
+//                     bat "docker exec  -u node backend_service npm install"
+//                 }
 //             }
 //         }
+
+//         stage('Verify Jest Installation') {
+//             steps {
+//                 script {
+//                     bat "docker exec backend_service npx jest --version"
+//                 }
+//             }
+//         }
+
+//         stage('Run Tests') {
+//             steps {
+//                 script {
+//                     bat "docker exec backend_service npm test"
+//                     bat "docker exec backend_service npx jest"
+//                 }
+//             }
+//         }
+
+//         stage('Login to Docker Hub') {
+//             steps {
+//                 script {
+//                     withCredentials([string(credentialsId: 'dockerhub-password', variable: 'DOCKER_PASSWORD')]) {
+//                         def loginResult = bat(script: "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}", returnStatus: true)
+//                         if (loginResult != 0) {
+//                             error "Docker login failed!"
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+
 
 //         stage('Push Docker Images') {
 //             parallel {
@@ -129,14 +183,13 @@
 //         always {
 //             bat 'docker logout'
 //             echo "Logged out from Docker Hub."
-//             bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
+//             bat 'docker-compose down -v || exit 0'
 //         }
 //         failure {
 //             echo "Pipeline failed. Check logs."
 //         }
 //     }
 // }
-
 
 
 pipeline {
@@ -148,11 +201,6 @@ pipeline {
         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
         DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
         BUILD_TAG = 'latest'
-        NETWORK_NAME = 'mern'
-        SSH_USER = 'ec2-user'
-        SSH_KET_PATH= "/var/lib/jenkins/.ssh/my-key-pair.pem"
-        EC2_PUBLIC_IP "51.20.53.236"
-        ANSIBLE_PLAYBOOK ="ansible/deploy.yml"
     }
 
     stages {
@@ -167,33 +215,6 @@ pipeline {
                             url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App.git'
                         ]]
                     )
-                }
-            }
-        }
-
-        stage('Setup SSH Key') {
-            steps {
-                script {
-                    sh """
-                        mkdir -p /var/lib/jenkins/.ssh
-                        cp /mnt/C:/Users/Asus/.ssh/my-key-pair.pem ${SSH_KEY_PATH}
-                        chmod 600 ${SSH_KEY_PATH}
-                    """
-                }
-            }
-        }
-
-
-
-
-        stage('Terraform Apply') {
-            steps {
-                script {
-                    bat '''
-                        cd terraform-aws
-                        terraform init
-                        terraform apply -auto-approve
-                    '''
                 }
             }
         }
@@ -225,13 +246,49 @@ pipeline {
             }
         }
 
+        // stage('Run Containers for Testing') {
+        //     steps {
+        //         script {
+        //           bat 'docker rm -f mongo_service || exit 0'  // Force remove mongo_service
+        //           bat 'docker rm -f backend_service || exit 0' // Force remove backend_service
+        //           bat 'docker rm -f frontend_service || exit 0' // Force remove frontend_service
+        //           bat 'docker-compose down -v || exit 0'      // Clean up Docker Compose stuff
+        //           bat 'docker-compose up -d'                 // Start containers
+        //         }
+        //     }
+        // }
+
+        // stage('Install Dependencies') {
+        //     steps {
+        //         script {
+        //             bat "docker exec -u node backend_service npm ci" // Correct way to install dependencies
+        //         }
+        //     }
+        // }
+
+        // stage('Run Tests') {
+        //     steps {
+        //         script {
+        //             bat "docker exec backend_service npm test"
+        //         }
+        //     }
+        // }
+// stage('Login to Docker Hub') {
+//             steps {
+//             withCredentials([string(credentialsId: 'dockerhub-pass', variable: 'timemaster-dockerhub')]) {
+//                     script {
+//                         bat "docker login -u kumesha2244 -p %%timemaster-dockerhub%%"
+//                     }
+//                 }
+//         }
+//         }
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'DOCKER_PASSWORD')]) {
-                    script {
-                    bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'timemaster-dockerhubpass')]) {
+                        bat "docker login -u kumesha2244 -p ${timemaster-dockerhubpass}"
+
                     }
-                }
+                
             }
         }
 
@@ -262,35 +319,6 @@ pipeline {
         }
     }
 
-
-    stage('Deploy to EC2 ') {
-            steps {
-                script {
-                    def ec2_public_ip = bat(script: "cd terraform && terraform output -raw public_ip", returnStdout: true).trim()
-
-                    bat """
-                        echo "Connecting to EC2 instance at ${ec2_public_ip}"
-                        ssh -o StrictHostKeyChecking=no -i ${SSH_PRIVATE_KEY} ${EC2_USER}@${ec2_public_ip} << EOF
-                        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-
-                        docker pull ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG}
-                        docker pull ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG}
-                        docker pull ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}
-
-                        docker network create mern_network || true
-
-                        docker run -d --network mern_network --name mongo -p 27017:27017 ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}
-                        docker run -d --network mern_network --name backend -p 5000:5000 ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG}
-                        docker run -d --network mern_network --name frontend -p 5173:5173 ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG}
-
-                        exit
-                        EOF
-                    """
-                }
-            }
-        }
-    }
-
     post {
         always {
             bat 'docker logout'
@@ -301,3 +329,11 @@ pipeline {
             echo "Pipeline failed. Check logs."
         }
     }
+}
+bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
+        }
+        failure {
+            echo "Pipeline failed. Check logs."
+        }
+    }
+}
