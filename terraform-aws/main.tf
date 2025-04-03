@@ -8,6 +8,11 @@ terraform {
   required_version = ">= 1.5.0"  # Minimum stable version
 }
 
+provider "aws" {
+  region = "eu-north-1"
+}
+
+
 data "aws_ami" "amazon_linux_2" {
   most_recent = true
   owners      = ["amazon"]
