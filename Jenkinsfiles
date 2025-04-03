@@ -166,6 +166,19 @@ pipeline {
             }
         }
 
+
+         stage('Terraform Apply') {
+            steps {
+                script {
+                    bat '''
+                        cd terraform-aws
+                        terraform init
+                        terraform apply -auto-approve
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Images') {
             parallel {
                 stage('Build Frontend') {
@@ -230,6 +243,35 @@ pipeline {
         }
     }
 
+
+    stage('Deploy to EC2') {
+            steps {
+                script {
+                    def ec2_public_ip = bat(script: "cd terraform && terraform output -raw public_ip", returnStdout: true).trim()
+
+                    bat """
+                        echo "Connecting to EC2 instance at ${ec2_public_ip}"
+                        ssh -o StrictHostKeyChecking=no -i ${SSH_PRIVATE_KEY} ${EC2_USER}@${ec2_public_ip} << EOF
+                        docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+
+                        docker pull ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG}
+                        docker pull ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG}
+                        docker pull ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}
+
+                        docker network create mern_network || true
+
+                        docker run -d --network mern_network --name mongo -p 27017:27017 ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}
+                        docker run -d --network mern_network --name backend -p 5000:5000 ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG}
+                        docker run -d --network mern_network --name frontend -p 5173:5173 ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG}
+
+                        exit
+                        EOF
+                    """
+                }
+            }
+        }
+    }
+
     post {
         always {
             bat 'docker logout'
@@ -240,4 +282,3 @@ pipeline {
             echo "Pipeline failed. Check logs."
         }
     }
-}
