@@ -137,13 +137,67 @@
 //     }
 // }
 
-stage('Login to Docker Hub') {
-            steps {
-                    withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'timemaster-dockerhubpass')]) {
-                        bat "docker login -u kumesha2244 -p ${timemaster-dockerhubpass}"
+pipeline {
+    agent any
 
+    environment {
+        DOCKER_USERNAME = 'kumesha2244'
+        DOCKER_IMAGE_FRONTEND = 'kumesha2244/frontend-service'
+        DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
+        DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
+        BUILD_TAG = 'latest'
+    }
+
+    stages {
+        stage('SCM Checkout') {
+            steps {
+                retry(3) {
+                    checkout scmGit(
+                        branches: [[name: '*/main']],
+                        extensions: [],
+                        userRemoteConfigs: [[
+                            credentialsId: 'githubtoken',
+                            url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App.git'
+                        ]]
+                    )
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            parallel {
+                stage('Build Frontend') {
+                    steps {
+                        script {
+                            bat "docker build -t ${DOCKER_IMAGE_FRONTEND}:${BUILD_TAG} ./frontend"
+                        }
                     }
-                
+                }
+                stage('Build Backend') {
+                    steps {
+                        script {
+                            bat "docker build -t ${DOCKER_IMAGE_BACKEND}:${BUILD_TAG} ./backend"
+                        }
+                    }
+                }
+                stage('Pull MongoDB Image') {
+                    steps {
+                        script {
+                            bat "docker pull mongo:6.0"
+                            bat "docker tag mongo:6.0 ${DOCKER_IMAGE_DATABASE}:${BUILD_TAG}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'timemaster-dockerhubpassword', variable: 'DOCKER_HUB_PASS')]) {
+                    script {
+                        bat "docker login -u ${DOCKER_USERNAME} -p \"${DOCKER_HUB_PASS}\""
+                    }
+                }
             }
         }
 
@@ -172,20 +226,21 @@ stage('Login to Docker Hub') {
                 }
             }
         }
+
+        stage('Cleanup Docker') {
+            steps {
+                script {
+                    bat 'docker system prune -af'
+                    bat 'docker-compose down -v || true'
+                }
+            }
+        }
     }
 
     post {
         always {
             bat 'docker logout'
             echo "Logged out from Docker Hub."
-            bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
-        }
-        failure {
-            echo "Pipeline failed. Check logs."
-        }
-    }
-}
-bat 'docker-compose down -v || true'  // Cleanup Docker Compose properly
         }
         failure {
             echo "Pipeline failed. Check logs."
