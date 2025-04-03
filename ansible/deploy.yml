@@ -1,0 +1,79 @@
+- name: Deploy MERN App to EC2
+  hosts: mern_servers
+  become: yes
+  vars:
+    docker_image_backend: "kumesha2244/backend-service:latest"
+    docker_image_frontend: "kumesha2244/frontend-service:latest"
+    docker_image_database: "kumesha2244/mongo-service:latest"
+    network_name: "mern_network"
+    backend_port: "5000"
+    frontend_port: "5173"
+    mongo_port: "27017"
+
+  tasks:
+    - name: Install Docker
+      package:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Login to Docker Hub
+      shell: echo "{{ dockerhub_password }}" | docker login -u "{{ dockerhub_username }}" --password-stdin
+      no_log: true
+
+    - name: Remove existing containers
+      shell: |
+        docker rm -f backend-container frontend-container mongo-container || true
+      ignore_errors: yes
+
+    - name: Pull the latest Docker images
+      shell: |
+        docker pull {{ docker_image_backend }}
+        docker pull {{ docker_image_frontend }}
+        docker pull {{ docker_image_database }}
+
+    - name: Create Docker network
+      docker_network:
+        name: "{{ network_name }}"
+        state: present
+
+    - name: Run MongoDB container
+      docker_container:
+        name: mongo-container
+        image: "{{ docker_image_database }}"
+        state: started
+        restart_policy: always
+        networks:
+          - name: "{{ network_name }}"
+        ports:
+          - "{{ mongo_port }}:{{ mongo_port }}"
+
+    - name: Run backend container
+      docker_container:
+        name: backend-container
+        image: "{{ docker_image_backend }}"
+        state: started
+        restart_policy: always
+        networks:
+          - name: "{{ network_name }}"
+        ports:
+          - "{{ backend_port }}:{{ backend_port }}"
+
+    - name: Run frontend container
+      docker_container:
+        name: frontend-container
+        image: "{{ docker_image_frontend }}"
+        state: started
+        restart_policy: always
+        networks:
+          - name: "{{ network_name }}"
+        ports:
+          - "80:{{ frontend_port }}"
+
+    - name: Logout from Docker Hub
+      shell: docker logout
