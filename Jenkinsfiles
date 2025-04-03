@@ -137,6 +137,7 @@
 //     }
 // }
 
+
 pipeline {
     agent any
 
@@ -160,6 +161,36 @@ pipeline {
                             url: 'https://github.com/KumeshaRashmi/Time-Master-Study-Planner-App.git'
                         ]]
                     )
+                }
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                script {
+                    dir('terraform-aws') {
+                        bat 'terraform init'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                script {
+                    dir('terraform-aws') {
+                        bat 'terraform plan -out=tfplan'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    dir('terraform-aws') {
+                        bat 'terraform apply -auto-approve tfplan'
+                    }
                 }
             }
         }
