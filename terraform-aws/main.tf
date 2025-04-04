@@ -48,6 +48,38 @@ resource "aws_security_group" "mern_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    description = "Backend Service Access"
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Frontend Service Access"
+    from_port   = 5173
+    to_port     = 5173
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "MongoDB Access"
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Jenkins Service Access"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -64,7 +96,7 @@ resource "aws_instance" "mern_instance" {
   ami                    =data.aws_ami.amazon_linux_2.id
   instance_type          = "t3.micro"  # Free Tier eligible
   key_name               = "my-key-pair"
-  vpc_security_group_ids = [aws_security_group.mern_sg.name]
+  vpc_security_group_ids = [aws_security_group.mern_sg.id]
 
   tags = {
     Name      = "MERN-Instance"
