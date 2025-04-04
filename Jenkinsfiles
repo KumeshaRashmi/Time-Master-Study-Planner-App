@@ -288,7 +288,7 @@ pipeline {
          stage('Terraform Init') {
             steps {
                 withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                                 string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                            string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         dir('terraform-aws') {
                             bat "set AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} && set AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} && terraform init"
@@ -298,42 +298,25 @@ pipeline {
             }
         }
 
-       stage('Terraform Plan') {
+        stage('Terraform Plan') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
+                script {
                     dir('terraform-aws') {
-                        bat """
-                            set AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-                            set AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-                            set AWS_DEFAULT_REGION=${AWS_REGION}
-                            terraform plan -out=tfplan
-                        """
+                        bat 'terraform plan -out=tfplan'
                     }
                 }
             }
         }
 
-         stage('Terraform Apply') {
+        stage('Terraform Apply') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
+                script {
                     dir('terraform-aws') {
-                        bat """
-                            set AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-                            set AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-                            set AWS_DEFAULT_REGION=${AWS_REGION}
-                            terraform apply -auto-approve tfplan
-                        """
+                        bat 'terraform apply -auto-approve tfplan'
                     }
                 }
             }
         }
-
 
 
         stage('Cleanup Docker') {
