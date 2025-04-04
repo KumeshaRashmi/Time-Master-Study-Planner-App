@@ -202,7 +202,7 @@ pipeline {
         DOCKER_IMAGE_BACKEND = 'kumesha2244/backend-service'
         DOCKER_IMAGE_DATABASE = 'kumesha2244/mongo-service'
         BUILD_TAG = 'latest'
-        AWS_REGION = 'eu-north-1'
+       
     }
 
     stages {
@@ -288,7 +288,7 @@ pipeline {
          stage('Terraform Init') {
             steps {
                 withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                            string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                                 string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
                         dir('terraform-aws') {
                             bat "set AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} && set AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} && terraform init"
@@ -297,6 +297,8 @@ pipeline {
                 }
             }
         }
+
+
 
         stage('Terraform Plan') {
             steps {
