@@ -302,12 +302,19 @@ pipeline {
 
 
 
-
-        stage('Terraform Plan') {
+ stage('Terraform Plan') {
             steps {
-                script {
-                    dir('terraform-aws') {
-                        bat 'terraform plan -out=tfplan'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    withEnv([
+                        "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}",
+                        "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+                    ]) {
+                        dir('terraform-aws') {
+                            bat 'terraform plan -out=tfplan'
+                        }
                     }
                 }
             }
@@ -315,9 +322,17 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                script {
-                    dir('terraform-aws') {
-                        bat 'terraform apply -auto-approve tfplan'
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    withEnv([
+                        "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}",
+                        "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}"
+                    ]) {
+                        dir('terraform-aws') {
+                            bat 'terraform apply -auto-approve tfplan'
+                        }
                     }
                 }
             }
