@@ -23,7 +23,7 @@ export default function Home() {
         {/* Text Content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
           <h2 className="text-2xl md:text-3xl text-white mb-4">
-            Transform Your Study Habits
+            Transform Your Study Habits ADS
           </h2>
           <h1 className="text-3xl md:text-5xl font-bold text-red-400 mb-4">
             <Typewriter
