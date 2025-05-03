@@ -10,6 +10,5 @@ their settings and preferences, ensuring a tailored experience for efficient stu
 
 
 ## Technology usage
-Use ReactJS with Tailwind CSS for the frontend, and Spring Boot for the backend. User 
-authentication will be managed with Spring Security, while task management will use Spring 
-Data, MongoDB, and Axios. The Pomodoro timer will utilize React State and timer libraries. 
+Use ReactJS with Tailwind CSS for the frontend, with mern stack. User 
+authentication will be managed , while task management will use MongoDB, and Axios. The Pomodoro timer will utilize React State and timer libraries. 
