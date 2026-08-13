@@ -120,7 +120,6 @@ The frontend is designed to work across:
 * Ansible
 * AWS EC2
 * GitHub
-* GitHub Actions
 
 ---
 
